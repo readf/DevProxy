@@ -1,0 +1,21 @@
+services:
+  devproxy:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: devproxy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      PORTLESS_STATE_DIR: /state
+      PORTLESS_SYNC_HOSTS: "0"
+      PORTLESS_LAN: "1"
+      PORTLESS_TLD: local
+      MAPPINGS_FILE: /config/mappings.json
+      PROXY_PORT: "443"
+      PUBLIC_PORT: "443"
+    volumes:
+      - ./config:/config:ro
+      - ./state:/state
