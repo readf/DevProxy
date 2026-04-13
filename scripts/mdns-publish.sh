@@ -60,7 +60,7 @@ for (const k of Object.keys(m)) {
 }
 ' "${mappings_file}")
 
-if [[ ! " ${hosts[*]} " =~ " ${dashboard_host} " ]]; then
+if [[ ${#hosts[@]} -eq 0 ]] || [[ ! " ${hosts[*]} " =~ " ${dashboard_host} " ]]; then
   hosts+=("${dashboard_host}")
 fi
 
