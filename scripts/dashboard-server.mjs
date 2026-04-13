@@ -87,7 +87,9 @@ function htmlEscape(value) {
 
 function renderPage({ requestHost, isFallback, mappings }) {
   const title = isFallback ? "Unknown host" : "Dev Proxy";
-  const subtitle = isFallback ? `No direct mapping found for ${requestHost}.` : "";
+  const subtitle = isFallback
+    ? `No direct mapping found for ${requestHost}.`
+    : "Securely route friendly .local hostnames to apps running on localhost ports.";
 
   const hidePort =
     (publicScheme === "https" && publicPort === "443") ||
@@ -118,9 +120,9 @@ function renderPage({ requestHost, isFallback, mappings }) {
     html { scroll-behavior: smooth; }
     body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; color: var(--primary); }
     main { max-width: 1000px; margin: 0 auto; background: white; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.15); overflow: hidden; }
-    header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 30px; color: white; }
-    header h1 { font-size: 2.2rem; font-weight: 700; margin-bottom: 8px; }
-    header p { font-size: 1.05rem; opacity: 0.95; }
+    header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 30px; color: #f8fbff; }
+    header h1 { font-size: 2.2rem; font-weight: 700; margin-bottom: 8px; color: #ffffff; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2); }
+    header p { font-size: 1.05rem; opacity: 0.98; color: #ecf2ff; text-shadow: 0 1px 1px rgba(0, 0, 0, 0.16); }
     .content { padding: 30px; }
     section { margin-bottom: 32px; }
     section:last-child { margin-bottom: 0; }
@@ -169,6 +171,7 @@ function renderPage({ requestHost, isFallback, mappings }) {
     .trust-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-top: 16px; }
     .trust-card { background: var(--bg-light); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
     .trust-card h3 { margin-top: 0; color: var(--primary); }
+    .trust-why { background: #eef6ff; border: 1px solid #c9dcff; border-radius: 12px; padding: 12px 14px; margin-bottom: 12px; color: #1f355e; }
     .download-link { display: inline-block; margin-bottom: 8px; font-weight: 600; }
     .divider { height: 1px; background: var(--border); margin: 28px 0; }
     @media (max-width: 600px) { header { padding: 30px 20px; } header h1 { font-size: 1.8rem; } .content { padding: 20px; } main { border-radius: 12px; } .trust-grid { grid-template-columns: 1fr; } table { font-size: 0.9rem; } th, td { padding: 10px; } input[type="text"], input[type="number"] { font-size: 16px; } }
@@ -181,7 +184,9 @@ function renderPage({ requestHost, isFallback, mappings }) {
       ${isFallback ? `<div class="warn"><strong>Unknown host:</strong> <code>${htmlEscape(requestHost)}</code></div>` : ""}
       <section>
         <h2>Proxy Mappings</h2>
-        <table id="mapTable"><thead><tr><th>Host</th><th>Port</th><th></th></tr></thead><tbody>${mappingRows}</tbody></table>
+        <p>Create local hostnames and point them to HTTP app ports running on this Mac.</p>
+        <p><strong>Host</strong>: the name DevProxy creates (served as <code>&lt;host&gt;.local</code>). <strong>Port</strong>: your local app port on <code>localhost</code>.</p>
+        <table id="mapTable"><thead><tr><th>Host name (.local)</th><th>Local app port (localhost)</th><th></th></tr></thead><tbody>${mappingRows}</tbody></table>
         <div class="row-actions"><button type="button" id="addRow">+ Add Mapping</button><button type="button" id="saveRows">💾 Save</button></div>
         <div id="status" class="status"></div>
       </section>
@@ -189,6 +194,7 @@ function renderPage({ requestHost, isFallback, mappings }) {
       <div class="divider"></div>
       <section>
         <h2>Trust Setup Instructions</h2>
+        <div class="trust-why"><strong>Why trust this certificate?</strong> DevProxy serves your local sites over HTTPS using a local development certificate authority. Without trusting it, browsers and mobile devices will show certificate warnings and can block secure requests, cookies, and service workers for your <code>*.local</code> sites.</div>
         <div class="trust-grid">
           <div class="trust-card"><h3>macOS</h3><ol><li><a class="download-link" href="${caUrl}" download>Download ca.pem</a></li><li>Open in Keychain Access (double-click or <code>open ca.pem</code>).</li><li>Add to <code>login</code> keychain.</li><li>Set Trust to <code>Always Trust</code>.</li><li>Restart Chrome or Safari.</li></ol></div>
           <div class="trust-card"><h3>Windows</h3><ol><li><a class="download-link" href="${caUrl}" download>Download ca.pem</a> and rename to <code>ca.cer</code>.</li><li>Open <code>certmgr.msc</code>.</li><li>Go to <code>Trusted Root Certification Authorities</code>.</li><li>Run <code>Import</code> and select the certificate.</li><li>Restart Chrome or Edge.</li></ol></div>
