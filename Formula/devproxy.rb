@@ -5,7 +5,7 @@ class Devproxy < Formula
   sha256 "280b619a31d8dafe8e58cccee61a9747b691709c6be3b73a26a9d65cbb8cc238"
   license "MIT"
   version "1.0.5"
-  revision 1
+  revision 2
 
   depends_on "docker"
 
@@ -25,10 +25,25 @@ class Devproxy < Formula
 
       ensure_runtime_layout() {
         mkdir -p "${runtime_root}/config" "${runtime_root}/state"
-        cp "${source_root}/docker-compose.yml" "${runtime_root}/docker-compose.yml"
-        cp "${source_root}/Dockerfile" "${runtime_root}/Dockerfile"
+        cp -L "${source_root}/docker-compose.yml" "${runtime_root}/docker-compose.yml"
+        cp -L "${source_root}/Dockerfile" "${runtime_root}/Dockerfile"
         rm -rf "${runtime_root}/scripts"
-        cp -R "${source_root}/scripts" "${runtime_root}/scripts"
+        mkdir -p "${runtime_root}/scripts"
+        cp -R -L "${source_root}/scripts/." "${runtime_root}/scripts/"
+
+        required=(
+          docker-entrypoint.sh
+          http-redirect.mjs
+          host-forward.mjs
+          dashboard-server.mjs
+          sync-mappings.mjs
+        )
+        for file in "${required[@]}"; do
+          if [[ ! -f "${runtime_root}/scripts/${file}" ]]; then
+            echo "Missing runtime script: ${runtime_root}/scripts/${file}" >&2
+            exit 1
+          fi
+        done
       }
 
       # Create user-writable runtime dirs on first run.
