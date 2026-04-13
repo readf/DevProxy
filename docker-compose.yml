@@ -17,5 +17,5 @@ services:
       PROXY_PORT: "443"
       PUBLIC_PORT: "443"
     volumes:
-      - ./config:/config:ro
+      - ./config:/config
       - ./state:/state

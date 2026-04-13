@@ -5,45 +5,34 @@ A Dockerized reverse proxy using [Portless](https://github.com/vercel-labs/portl
 - LAN mode with host-side `.local` mDNS publishing
 - HTTPS exposed on `0.0.0.0:443`
 - HTTP exposed on `0.0.0.0:80`, redirecting to `443`
-- Static host mappings from `config/mappings.json`
+- Dashboard-managed host mappings
 - Portless state and CA stored in `./state`
 - Automatic forwarding from container `localhost:<port>` to host `localhost:<port>`
 - Built-in dashboard at `https://proxy.local`
 - Unknown `*.local` hostnames fall back to the dashboard as a 404 page
+- Web UI on `proxy.local` to view and edit proxy mappings
 
-## Mappings file
+## Manage mappings
 
-Edit `config/mappings.json`. Every mapping becomes `<name>.local`.
+Use the dashboard at `https://proxy.local` to add, edit, and remove mappings.
 
-```json
-{
-  "sample-client": "localhost:4200",
-  "api": 3001
-}
-```
+Each mapping becomes `<name>.local`.
 
-More examples:
+Example mapping values:
 
-```json
-{
-  "sample-client": "localhost:4200",
-  "api": "127.0.0.1:3001",
-  "admin": 5173
-}
-```
+- `localhost:4200`
+- `127.0.0.1:3001`
+- `5173`
+
+Route names must be a single hostname label (letters, numbers, hyphens only).
 
 Each key is a route name, each value is either:
 
 - `localhost:<port>` / `127.0.0.1:<port>`
 - or a numeric port
 
-Each key must be a single hostname label (letters, numbers, hyphens only).
-
 This example is reachable at:
 
-- `https://sample-client.local`
-- `https://api.local`
-- `https://admin.local`
 - `https://sample-client.local`
 - `https://api.local`
 - `https://admin.local`
@@ -60,17 +49,6 @@ bash scripts/start-proxy.sh
 ```
 
 This starts the Docker stack, then publishes each mapped `<name>.local` on your Mac with `dns-sd`.
-
-## Sync mapping changes
-
-After editing `config/mappings.json`:
-
-```bash
-bash scripts/sync.sh
-```
-
-This rewrites the Portless routes file inside the container and prints the reachable URLs.
-It also refreshes host-side mDNS publishers for the updated mappings.
 
 ## Export the root CA certificate
 
