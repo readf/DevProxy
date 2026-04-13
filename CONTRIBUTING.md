@@ -4,7 +4,7 @@ Thanks for your interest in contributing! Here's how to help:
 
 ## Reporting Issues
 
-- Check [existing issues](https://github.com/fredread/devproxy/issues) first.
+- Check [existing issues](https://github.com/readf/DevProxy/issues) first.
 - Describe the problem clearly: what you did, what happened, what you expected.
 - Include:
   - macOS version

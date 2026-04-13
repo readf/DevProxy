@@ -1,6 +1,6 @@
 class Devproxy < Formula
   desc "Local development reverse proxy with mDNS publishing"
-  homepage "https://github.com/fredread/devproxy"
+  homepage "https://github.com/readf/DevProxy"
   url "https://github.com/readf/DevProxy/archive/v1.0.2.tar.gz"
   sha256 "38818578b5870eef6617cf5d6a9e62eeff4ee72526d74f8edff14d1b2a183fa1"
   license "MIT"

@@ -6,7 +6,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/fredread/devproxy.git"
+    "url": "https://github.com/readf/DevProxy.git"
   },
   "engines": {
     "node": ">=18"

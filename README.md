@@ -27,7 +27,7 @@ A Dockerized reverse proxy using [Portless](https://github.com/vercel-labs/portl
 ### Via Homebrew (recommended for macOS)
 
 ```bash
-brew tap fredread/devproxy https://github.com/fredread/devproxy
+brew tap readf/DevProxy https://github.com/readf/DevProxy
 brew install devproxy
 devproxy start
 ```
@@ -37,7 +37,7 @@ Then visit `https://proxy.local` to get started.
 ### Manual setup
 
 ```bash
-git clone https://github.com/fredread/devproxy.git
+git clone https://github.com/readf/DevProxy.git
 cd devproxy
 bash scripts/start-proxy.sh
 ```
