@@ -1,0 +1,4 @@
+# Enforce Unix (LF) line endings for all scripts and formula files
+*.sh text eol=lf
+*.rb text eol=lf
+*.mjs text eol=lf
