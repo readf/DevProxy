@@ -20,20 +20,32 @@ class Devproxy < Formula
       set -euo pipefail
 
       cmd="${1:-start}"
-      repo_root="#{libexec}"
+      source_root="#{libexec}"
+      runtime_root="${HOME}/.devproxy"
+
+      ensure_runtime_layout() {
+        mkdir -p "${runtime_root}/config" "${runtime_root}/state"
+        cp "${source_root}/docker-compose.yml" "${runtime_root}/docker-compose.yml"
+        cp "${source_root}/Dockerfile" "${runtime_root}/Dockerfile"
+        rm -rf "${runtime_root}/scripts"
+        cp -R "${source_root}/scripts" "${runtime_root}/scripts"
+      }
 
       # Create user-writable runtime dirs on first run.
       mkdir -p "$HOME/.devproxy/config" "$HOME/.devproxy/state"
 
       case "$cmd" in
         start)
-          bash "$repo_root/scripts/start-proxy.sh"
+          ensure_runtime_layout
+          bash "$runtime_root/scripts/start-proxy.sh"
           ;;
         stop)
-          bash "$repo_root/scripts/stop-proxy.sh"
+          ensure_runtime_layout
+          bash "$runtime_root/scripts/stop-proxy.sh"
           ;;
         logs)
-          cd "$repo_root"
+          ensure_runtime_layout
+          cd "$runtime_root"
           docker compose logs -f devproxy
           ;;
         *)
