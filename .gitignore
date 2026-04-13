@@ -1,2 +1,3 @@
 state/
 *.pem
+config/mappings.json

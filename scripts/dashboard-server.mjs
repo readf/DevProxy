@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import fs from "node:fs";
 import http from "node:http";
+import path from "node:path";
 
 const mappingsPath = process.env.MAPPINGS_FILE || "/config/mappings.json";
 const stateDir = process.env.PORTLESS_STATE_DIR || "/state";
@@ -68,6 +69,7 @@ function buildRoutes(mappings) {
 }
 
 function persistMappingsAndRoutes(mappings) {
+  fs.mkdirSync(path.dirname(mappingsPath), { recursive: true });
   fs.writeFileSync(mappingsPath, JSON.stringify(mappings, null, 2) + "\n", "utf8");
   fs.mkdirSync(stateDir, { recursive: true });
   fs.writeFileSync(routesPath, JSON.stringify(buildRoutes(mappings), null, 2) + "\n", "utf8");

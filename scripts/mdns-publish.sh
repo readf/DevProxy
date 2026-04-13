@@ -13,8 +13,8 @@ if ! command -v dns-sd >/dev/null 2>&1; then
 fi
 
 if [[ ! -f "${mappings_file}" ]]; then
-  echo "Mappings file not found: ${mappings_file}" >&2
-  exit 1
+  mkdir -p "${repo_root}/config"
+  printf '{}\n' > "${mappings_file}"
 fi
 
 lan_ip="${LAN_IP:-}"

@@ -2,10 +2,12 @@
 set -euo pipefail
 
 repo_root="$(cd "$(dirname "$0")/.." && pwd)"
+mappings_file="${repo_root}/config/mappings.json"
 
-if [[ ! -f "${repo_root}/config/mappings.json" ]]; then
-  echo "Mappings file not found: ${repo_root}/config/mappings.json" >&2
-  exit 1
+mkdir -p "${repo_root}/config"
+if [[ ! -f "${mappings_file}" ]]; then
+  printf '{}\n' > "${mappings_file}"
+  echo "Created blank mappings file at ${mappings_file}."
 fi
 
 cd "${repo_root}"

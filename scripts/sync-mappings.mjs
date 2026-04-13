@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import fs from "node:fs";
+import path from "node:path";
 
 const mappingsPath = process.env.MAPPINGS_FILE || "/config/mappings.json";
 const stateDir = process.env.PORTLESS_STATE_DIR || "/state";
@@ -15,7 +16,8 @@ function fail(message) {
 }
 
 if (!fs.existsSync(mappingsPath)) {
-  fail(`Mappings file not found: ${mappingsPath}`);
+  fs.mkdirSync(path.dirname(mappingsPath), { recursive: true });
+  fs.writeFileSync(mappingsPath, "{}\n", "utf8");
 }
 
 let raw;
