@@ -1,0 +1,22 @@
+{
+  "name": "devproxy",
+  "version": "1.0.0",
+  "description": "Local development reverse proxy with mDNS publishing",
+  "author": "DevProxy Contributors",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fredread/devproxy.git"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "proxy",
+    "reverse-proxy",
+    "development",
+    "localhost",
+    "mDNS",
+    "docker"
+  ]
+}

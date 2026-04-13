@@ -92,11 +92,16 @@ try {
 
 console.log(`Synced ${routes.length} host mapping(s) from ${mappingsPath} to ${routesPath}`);
 if (routes.length > 0) {
+  const hidePort =
+    (publicScheme === "https" && publicPort === "443") ||
+    (publicScheme === "http" && publicPort === "80");
+  const publicPortSuffix = hidePort ? "" : `:${publicPort}`;
+
   console.log("Reachable URLs:");
   for (const route of routes) {
     if (route.hostname === "local") {
       continue;
     }
-    console.log(`  ${publicScheme}://${route.hostname}:${publicPort}`);
+    console.log(`  ${publicScheme}://${route.hostname}${publicPortSuffix}`);
   }
 }

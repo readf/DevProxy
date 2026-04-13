@@ -1,4 +1,8 @@
-# DevProxy (Portless-based)
+# DevProxy
+
+A Dockerized reverse proxy using [Portless](https://github.com/vercel-labs/portless) for local development. Easily route `.local` domains to backend services running on your Mac.
+
+## Features
 
 A Dockerized reverse proxy using [Portless](https://github.com/vercel-labs/portless) with:
 
@@ -11,6 +15,46 @@ A Dockerized reverse proxy using [Portless](https://github.com/vercel-labs/portl
 - Built-in dashboard at `https://proxy.local`
 - Unknown `*.local` hostnames fall back to the dashboard as a 404 page
 - Web UI on `proxy.local` to view and edit proxy mappings
+
+## Requirements
+
+- macOS (10.13+) — uses `dns-sd` for LAN mDNS publishing
+- Docker Desktop running
+- No special ports required at startup (runs on ports 80/443)
+
+## Installation
+
+### Via Homebrew (recommended for macOS)
+
+```bash
+brew tap fredread/devproxy https://github.com/fredread/devproxy
+brew install devproxy
+devproxy start
+```
+
+Then visit `https://proxy.local` to get started.
+
+### Manual setup
+
+```bash
+git clone https://github.com/fredread/devproxy.git
+cd devproxy
+bash scripts/start-proxy.sh
+```
+
+Visit `https://proxy.local` in your browser.
+
+## Quick start
+
+1. Run `devproxy start` (or `bash scripts/start-proxy.sh` if manual setup).
+2. Visit `https://proxy.local` in your browser.
+3. Add a mapping:
+   - Host: `myapp`
+   - Port: `3000`
+4. Click **Save**.
+5. Visit `https://myapp.local` — traffic now routes to `localhost:3000`.
+
+Mappings persist in `config/mappings.json` and update in real time.
 
 ## Manage mappings
 
@@ -100,9 +144,46 @@ If trust still fails on any platform, remove older `portless Local CA` entries a
 bash scripts/stop-proxy.sh
 ```
 
+Or with Homebrew:
+
+```bash
+devproxy stop
+```
+
 This stops host-side mDNS publisher processes and brings down the Docker stack.
+
+## Troubleshooting
+
+### `https://proxy.local` shows certificate warning
+
+Your browser doesn't trust the dev CA yet. Download and install the certificate:
+
+1. Go to `https://proxy.local/ca.pem` and save the file.
+2. Follow the trust instructions in the dashboard (or see the **Trust the certificate** section above).
+3. Restart your browser.
+
+### Mappings don't appear to work
+
+- Confirm DevProxy is running: `docker compose ps` (in the project root).
+- Check that your backend service is actually listening on the specified port.
+- If just added, give the dashboard a few seconds to update routes and republish mDNS.
+
+### Cannot find `proxy.local` on my network
+
+- Restart your browser or device.
+- Confirm you're on the same LAN as the Mac running DevProxy.
+- On iPhone, make sure WiFi is connected to the same network (not cellular).
 
 ## Notes
 
 - Portless auto-redirect only applies on port `443`, and this project also keeps an explicit HTTP redirect on port `80` to `443`.
 - Docker Desktop on macOS may limit mDNS passthrough from containers. This project works around that by publishing mDNS records from the host instead.
+- DevProxy requires elevated privileges to bind ports 80/443. Use `sudo` if needed.
+
+## License
+
+MIT — See [LICENSE](LICENSE) for details.
+
+## Contributing
+
+Contributions welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.

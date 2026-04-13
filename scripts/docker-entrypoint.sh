@@ -21,6 +21,24 @@ rm -f "${PORTLESS_STATE_DIR}/routes.lock"
 
 dbus-uuidgen --ensure
 mkdir -p /run/dbus
+
+# Docker restarts can leave stale pid files in /run; clear them before daemon startup.
+if [[ -f /run/dbus/pid ]]; then
+  old_dbus_pid="$(cat /run/dbus/pid 2>/dev/null || true)"
+  if [[ -n "${old_dbus_pid}" ]] && kill -0 "${old_dbus_pid}" 2>/dev/null; then
+    kill "${old_dbus_pid}" 2>/dev/null || true
+  fi
+  rm -f /run/dbus/pid
+fi
+
+if [[ -f /run/avahi-daemon/pid ]]; then
+  old_avahi_pid="$(cat /run/avahi-daemon/pid 2>/dev/null || true)"
+  if [[ -n "${old_avahi_pid}" ]] && kill -0 "${old_avahi_pid}" 2>/dev/null; then
+    kill "${old_avahi_pid}" 2>/dev/null || true
+  fi
+  rm -f /run/avahi-daemon/pid
+fi
+
 dbus-daemon --system --fork
 avahi-daemon --daemonize --no-drop-root
 

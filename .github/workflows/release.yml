@@ -1,0 +1,26 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Update Homebrew formula
+        run: |
+          echo "To update Homebrew formula after release:"
+          echo "1. Get SHA256 of tarball: shasum -a 256 devproxy-\${{ github.ref_name }}.tar.gz"
+          echo "2. Update Formula/devproxy.rb with new version and sha256"
+          echo "3. Push to homebrew-devproxy tap"

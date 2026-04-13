@@ -1,3 +1,7 @@
 state/
+certs/
 *.pem
 config/mappings.json
+.DS_Store
+node_modules/
+*.log
