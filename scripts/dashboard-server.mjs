@@ -189,8 +189,8 @@ function renderPage({ requestHost, isFallback, mappings }) {
         <table id="mapTable"><thead><tr><th>Host name (.local)</th><th>Local app port (localhost)</th><th></th></tr></thead><tbody>${mappingRows}</tbody></table>
         <div class="row-actions"><button type="button" id="addRow">+ Add Mapping</button><button type="button" id="saveRows">💾 Save</button></div>
         <div id="status" class="status"></div>
+        ${rows ? `<p><strong>Reachable now:</strong></p><ul class="link-list">${rows}</ul>` : ""}
       </section>
-      ${rows ? `<section><h2>Reachable addresses</h2><ul class="link-list">${rows}</ul></section>` : ""}
       <div class="divider"></div>
       <section>
         <h2>Trust Setup Instructions</h2>
