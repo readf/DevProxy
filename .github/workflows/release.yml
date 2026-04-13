@@ -37,9 +37,12 @@ jobs:
             -e "s|version \".*\"|version \"${VERSION}\"|" \
             Formula/devproxy.rb
 
-          # Commit and push updated formula
+          # Sync version in package.json
+          sed -i "s/\"version\": \".*\"/\"version\": \"${VERSION}\"/" package.json
+
+          # Commit and push
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add Formula/devproxy.rb
-          git commit -m "chore: update Homebrew formula for ${TAG}"
+          git add Formula/devproxy.rb package.json
+          git commit -m "chore: update Homebrew formula and package.json for ${TAG}"
           git push origin HEAD:main
