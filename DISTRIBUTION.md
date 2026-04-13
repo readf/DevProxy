@@ -118,3 +118,4 @@ The `.github/workflows/release.yml` file includes a template for automating GitH
 - **Users cannot install via Homebrew**: Confirm the tap is public and the formula syntax is correct (`brew audit --online readf/DevProxy/formula/devproxy.rb`).
 - **Docker image not pulling**: Ensure your Docker Hub account is public or users have appropriate credentials.
 - **Setup script fails on fresh clone**: Verify all scripts are executable (`chmod +x scripts/*.sh`).
+- **Users report Docker socket errors on start/stop/logs**: DevProxy now prints a friendly preflight message when Docker is unavailable. In release testing, verify `devproxy start`, `devproxy stop`, and `devproxy logs` show actionable output when Docker Desktop is stopped.

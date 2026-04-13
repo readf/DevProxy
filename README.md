@@ -154,6 +154,18 @@ This stops host-side mDNS publisher processes and brings down the Docker stack.
 
 ## Troubleshooting
 
+### Docker is installed but not reachable
+
+If `devproxy start`, `devproxy stop`, or `devproxy logs` prints:
+
+`Docker is installed but not reachable. Start Docker Desktop (or ensure the daemon is running) and try again.`
+
+- Start Docker Desktop and wait for it to finish launching.
+- Verify Docker is reachable: `docker info`.
+- Retry the command.
+
+If Docker is not installed, install Docker Desktop first.
+
 ### `https://proxy.local` shows certificate warning
 
 Your browser doesn't trust the dev CA yet. Download and install the certificate:
