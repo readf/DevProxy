@@ -1,11 +1,10 @@
 class Devproxy < Formula
   desc "Local development reverse proxy with mDNS publishing"
   homepage "https://github.com/readf/DevProxy"
-  url "https://github.com/readf/DevProxy/archive/v1.0.5.tar.gz"
-  sha256 "280b619a31d8dafe8e58cccee61a9747b691709c6be3b73a26a9d65cbb8cc238"
+  url "https://github.com/readf/DevProxy/archive/v1.0.6.tar.gz"
+  sha256 "TODO: run `shasum -a 256 devproxy-v1.0.6.tar.gz` after release"
   license "MIT"
-  version "1.0.5"
-  revision 2
+  version "1.0.6"
 
   depends_on "docker"
 
