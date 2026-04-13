@@ -8,6 +8,8 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v3
       
@@ -20,7 +22,24 @@ jobs:
       
       - name: Update Homebrew formula
         run: |
-          echo "To update Homebrew formula after release:"
-          echo "1. Get SHA256 of tarball: shasum -a 256 devproxy-\${{ github.ref_name }}.tar.gz"
-          echo "2. Update Formula/devproxy.rb with new version and sha256"
-          echo "3. Push to homebrew-devproxy tap"
+          TAG="${{ github.ref_name }}"
+          VERSION="${TAG#v}"
+          TARBALL_URL="https://github.com/${{ github.repository }}/archive/${TAG}.tar.gz"
+
+          # Download tarball and compute sha256
+          curl -fsSL "$TARBALL_URL" -o release.tar.gz
+          SHA256=$(shasum -a 256 release.tar.gz | awk '{print $1}')
+
+          # Update formula in-place
+          sed -i \
+            -e "s|url \".*\"|url \"https://github.com/${{ github.repository }}/archive/${TAG}.tar.gz\"|" \
+            -e "s|sha256 \".*\"|sha256 \"${SHA256}\"|" \
+            -e "s|version \".*\"|version \"${VERSION}\"|" \
+            Formula/devproxy.rb
+
+          # Commit and push updated formula
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add Formula/devproxy.rb
+          git commit -m "chore: update Homebrew formula for ${TAG}"
+          git push origin HEAD:main

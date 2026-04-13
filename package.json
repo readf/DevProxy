@@ -1,6 +1,6 @@
 {
   "name": "devproxy",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Local development reverse proxy with mDNS publishing",
   "author": "DevProxy Contributors",
   "license": "MIT",
