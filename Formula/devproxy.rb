@@ -5,6 +5,7 @@ class Devproxy < Formula
   sha256 "74fa97eee26e716a82eb1b2c861f8f2bbe7ea627104d314a806d97d43f1fe6cc"
   license "MIT"
   version "1.0.4"
+  revision 1
 
   depends_on "docker"
 
@@ -20,6 +21,9 @@ class Devproxy < Formula
 
       cmd="${1:-start}"
       repo_root="#{libexec}"
+
+      # Create user-writable runtime dirs on first run.
+      mkdir -p "$HOME/.devproxy/config" "$HOME/.devproxy/state"
 
       case "$cmd" in
         start)
@@ -42,9 +46,8 @@ class Devproxy < Formula
   end
 
   def post_install
-    system "mkdir", "-p", "#{ENV['HOME']}/.devproxy/config"
-    system "mkdir", "-p", "#{ENV['HOME']}/.devproxy/state"
-    puts "DevProxy installed. Created config directory at ~/.devproxy/"
+    # No-op: Homebrew post_install runs in a restricted context where writing
+    # to the user's home directory can be denied.
   end
 
   test do
