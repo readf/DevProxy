@@ -1,10 +1,10 @@
 class Devproxy < Formula
   desc "Local development reverse proxy with mDNS publishing"
   homepage "https://github.com/readf/DevProxy"
-  url "https://github.com/readf/DevProxy/archive/v1.1.0.tar.gz"
-  sha256 "51a2098b57f27a23f05722daeb544adf74924dbb68359c53ed9708944fbc18d0"
+  url "https://github.com/readf/DevProxy/archive/v1.1.1.tar.gz"
+  sha256 "PLACEHOLDER"
   license "MIT"
-  version "1.1.0"
+  version "1.1.1"
 
   depends_on "docker"
 
@@ -12,9 +12,12 @@ class Devproxy < Formula
     # Copy scripts into libexec
     libexec.install "scripts"
     libexec.install "Dockerfile", "docker-compose.yml"
-    
-    # Create bin wrapper
-    (bin/"devproxy").write <<~EOS
+
+    # Write wrapper to buildpath (mutable), make executable, then install.
+    # Homebrew's Pathname#write sets files read-only (0444); writing to buildpath
+    # first and using bin.install ensures the execute bit is preserved.
+    wrapper = buildpath/"devproxy"
+    wrapper.write <<~EOS
       #!/usr/bin/env bash
       set -euo pipefail
 
@@ -99,7 +102,8 @@ EOF
           ;;
       esac
     EOS
-    chmod 0755, bin/"devproxy"
+    wrapper.chmod(0755)
+    bin.install wrapper
   end
 
   def post_install
