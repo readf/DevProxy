@@ -63,9 +63,12 @@ function buildRoutes(mappings) {
   const routes = [];
   for (const [host, target] of Object.entries(mappings)) {
     routes.push({ hostname: `${host}.local`, port: parsePort(target), pid: 0 });
+    routes.push({ hostname: `${host}.localhost`, port: parsePort(target), pid: 0 });
   }
   routes.push({ hostname: `${dashboardHost}.local`, port: dashboardPort, pid: 0 });
+  routes.push({ hostname: `${dashboardHost}.localhost`, port: dashboardPort, pid: 0 });
   routes.push({ hostname: "local", port: dashboardPort, pid: 0 });
+  routes.push({ hostname: "localhost", port: dashboardPort, pid: 0 });
   return routes;
 }
 
@@ -286,8 +289,7 @@ const server = http.createServer((req, res) => {
 
   const hostHeader = req.headers["x-forwarded-host"] || req.headers["x-original-host"] || req.headers.host || "";
   const requestHost = hostHeader.split(":")[0].toLowerCase();
-  const dashboardFqdn = `${dashboardHost}.local`;
-  const isFallback = requestHost !== dashboardFqdn;
+  const isFallback = requestHost !== `${dashboardHost}.local` && requestHost !== `${dashboardHost}.localhost`;
   const html = renderPage({ requestHost, isFallback, mappings: readMappings() });
   res.statusCode = isFallback ? 404 : 200;
   res.setHeader("content-type", "text/html; charset=utf-8");

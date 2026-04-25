@@ -68,8 +68,8 @@ for (const [host, target] of Object.entries(mappings)) {
     fail(`Invalid port for ${host}: ${port}`);
   }
 
-  const hostname = `${host}.local`;
-  routes.push({ hostname, port, pid: 0 });
+  routes.push({ hostname: `${host}.local`, port, pid: 0 });
+  routes.push({ hostname: `${host}.localhost`, port, pid: 0 });
 }
 
 if (!/^[a-z0-9-]+$/.test(dashboardHost)) {
@@ -81,8 +81,10 @@ if (!Number.isInteger(dashboardPort) || dashboardPort < 1 || dashboardPort > 655
 }
 
 routes.push({ hostname: `${dashboardHost}.local`, port: dashboardPort, pid: 0 });
-// Wildcard fallback for unknown *.local hosts when --wildcard is enabled.
+routes.push({ hostname: `${dashboardHost}.localhost`, port: dashboardPort, pid: 0 });
+// Wildcard fallback for unknown *.local and *.localhost hosts when --wildcard is enabled.
 routes.push({ hostname: "local", port: dashboardPort, pid: 0 });
+routes.push({ hostname: "localhost", port: dashboardPort, pid: 0 });
 
 try {
   fs.writeFileSync(routesPath, JSON.stringify(routes, null, 2) + "\n", "utf8");
@@ -99,7 +101,7 @@ if (routes.length > 0) {
 
   console.log("Reachable URLs:");
   for (const route of routes) {
-    if (route.hostname === "local") {
+    if (route.hostname === "local" || route.hostname === "localhost") {
       continue;
     }
     console.log(`  ${publicScheme}://${route.hostname}${publicPortSuffix}`);
