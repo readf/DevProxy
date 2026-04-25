@@ -2,3 +2,4 @@
 *.sh text eol=lf
 *.rb text eol=lf
 *.mjs text eol=lf
+bin/devproxy text eol=lf
