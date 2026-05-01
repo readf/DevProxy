@@ -47,12 +47,18 @@ function normalizeMappings(input) {
   const out = {};
   for (const [host, target] of Object.entries(input)) {
     const key = String(host).toLowerCase().trim();
-    if (!/^[a-z0-9-]+$/.test(key)) {
+    if (!/^[a-z0-9-]+(\.[a-z0-9-]+)*$/.test(key)) {
       throw new Error(`Invalid host key: ${host}`);
     }
     const port = parsePort(target);
     if (!Number.isInteger(port) || port < 1 || port > 65535) {
       throw new Error(`Invalid port for ${host}: ${port}`);
+    }
+    const reservedPorts = new Set([80, Number(publicPort), dashboardPort].filter(Number.isFinite));
+    if (reservedPorts.has(port)) {
+      throw new Error(
+        `Port ${port} is reserved by DevProxy (used for the proxy, HTTP redirect, or dashboard). Choose a different port for "${host}".`
+      );
     }
     out[key] = port;
   }
@@ -99,19 +105,52 @@ function renderPage({ requestHost, isFallback, mappings }) {
     (publicScheme === "http" && publicPort === "80");
   const publicPortSuffix = hidePort ? "" : `:${publicPort}`;
 
-  const hosts = Object.keys(mappings).filter((h) => /^[a-z0-9-]+$/.test(h)).sort();
-  const rows = hosts
-    .map(
-      (h) =>
-        `<li><a href="${publicScheme}://${h}.local${publicPortSuffix}">${publicScheme}://${h}.local${publicPortSuffix}</a></li>`
-    )
+  const hosts = Object.keys(mappings).filter((h) => /^[a-z0-9-]+(\.[a-z0-9-]+)*$/.test(h)).sort();
+  const grouped = {};
+  for (const h of hosts) {
+    const key = h.includes(".") ? h.split(".").pop() : "";
+    if (!grouped[key]) grouped[key] = [];
+    grouped[key].push(h);
+  }
+  const rows = Object.entries(grouped)
+    .sort(([a], [b]) => {
+      if (a === "") return 1;
+      if (b === "") return -1;
+      return a.localeCompare(b);
+    })
+    .map(([sld, groupHosts]) => {
+      const label = sld === "" ? "General" : sld;
+      const items = groupHosts
+        .map((h) => `<li><a href="${publicScheme}://${h}.local${publicPortSuffix}" target="_blank" rel="noopener noreferrer">${publicScheme}://${h}.local${publicPortSuffix}</a></li>`)
+        .join("\n");
+      return `<li class="link-group"><strong>${htmlEscape(label)}</strong><ul class="link-list">${items}</ul></li>`;
+    })
     .join("\n");
 
-  const mappingRows = hosts
-    .map(
-      (h) =>
-        `<tr><td><input type="text" value="${h}" data-col="host" spellcheck="false" /></td><td><input type="number" value="${parsePort(mappings[h])}" data-col="port" min="1" max="65535" inputmode="numeric" /></td><td><button type="button" class="remove">Remove</button></td></tr>`
-    )
+  const hasSubdomains = hosts.some((h) => h.includes("."));
+  const subdomainWarning = hasSubdomains
+    ? `<p class="warn-soft">⚠️ You have subdomain-style hostnames (e.g. <code>app.project.local</code>). These resolve correctly on macOS and iOS, but Windows and Linux clients typically cannot resolve multi-level <code>.local</code> names via mDNS.</p>`
+    : "";
+  const mappingGrouped = {};
+  for (const h of hosts) {
+    const key = h.includes(".") ? h.split(".").pop() : "";
+    if (!mappingGrouped[key]) mappingGrouped[key] = [];
+    mappingGrouped[key].push(h);
+  }
+  const mappingRows = Object.entries(mappingGrouped)
+    .sort(([a], [b]) => {
+      if (a === "") return 1;
+      if (b === "") return -1;
+      return a.localeCompare(b);
+    })
+    .map(([sld, groupHosts]) => {
+      const label = sld === "" ? "General" : sld;
+      const headerRow = `<tr class="group-header-row"><td colspan="3">${htmlEscape(label)}</td></tr>`;
+      const dataRows = groupHosts
+        .map((h) => `<tr><td><input type="text" value="${h}" data-col="host" spellcheck="false" /></td><td><input type="number" value="${parsePort(mappings[h])}" data-col="port" min="1" max="65535" inputmode="numeric" /></td><td><button type="button" class="remove">Remove</button></td></tr>`)
+        .join("\n");
+      return headerRow + "\n" + dataRows;
+    })
     .join("\n");
 
   const dashboardUrl = `${publicScheme}://${dashboardHost}.local${publicPortSuffix}`;
@@ -138,6 +177,7 @@ function renderPage({ requestHost, isFallback, mappings }) {
     code { background: #eef2ff; border: 1px solid #dbe4ff; padding: 1px 6px; border-radius: 6px; font-family: 'Monaco', 'Courier New', monospace; font-size: 0.86em; color: #2b3553; }
     .warn { background: #fef3c7; border-left: 4px solid var(--warning); padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; }
     .warn strong { color: #92400e; }
+    .warn-soft { background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 10px 14px; margin-top: 12px; font-size: 0.9rem; color: #78350f; }
     .info-box { background: var(--bg-light); border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 16px; }
     .info-box strong { color: var(--primary); }
     ul { margin-left: 20px; }
@@ -148,6 +188,10 @@ function renderPage({ requestHost, isFallback, mappings }) {
     .link-list li { margin-bottom: 10px; }
     .link-list a { display: inline-flex; align-items: center; gap: 8px; padding: 10px 12px; background: var(--accent-light); border-radius: 8px; transition: background 0.3s; }
     .link-list a:hover { background: var(--accent); color: white; }
+    .link-groups { list-style: none; margin: 0; }
+    .link-group { margin-bottom: 16px; }
+    .link-group > strong { display: block; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.06em; color: #6b7280; margin-bottom: 6px; }
+    .link-group .link-list { margin-left: 0; }
     table { width: 100%; border-collapse: collapse; margin: 16px 0; }
     thead { background: var(--bg-light); border-bottom: 2px solid var(--border); }
     th { padding: 14px; text-align: left; font-weight: 600; color: var(--primary); font-size: 0.95rem; }
@@ -168,6 +212,7 @@ function renderPage({ requestHost, isFallback, mappings }) {
     #saveRows:hover { background: #059669; }
     .remove { background: #fee2e2; color: var(--error); border: none; padding: 6px 12px; font-size: 0.9rem; }
     .remove:hover { background: #fecaca; }
+    .group-header-row td { background: var(--bg-light); border-bottom: 2px solid var(--border); padding: 6px 14px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: #6b7280; }
     .status { min-height: 20px; margin-top: 12px; padding: 8px 12px; border-radius: 6px; font-weight: 500; }
     .status.success { background: #d1fae5; color: #065f46; }
     .status.err { background: #fee2e2; color: #7f1d1d; }
@@ -192,7 +237,8 @@ function renderPage({ requestHost, isFallback, mappings }) {
         <table id="mapTable"><thead><tr><th>Host name (.local)</th><th>Local app port (localhost)</th><th></th></tr></thead><tbody>${mappingRows}</tbody></table>
         <div class="row-actions"><button type="button" id="addRow">+ Add Mapping</button><button type="button" id="saveRows">💾 Save</button></div>
         <div id="status" class="status"></div>
-        ${rows ? `<p><strong>Reachable now:</strong></p><ul class="link-list">${rows}</ul>` : ""}
+        ${subdomainWarning}
+        ${rows ? `<p><strong>Reachable now:</strong></p><ul class="link-groups">${rows}</ul>` : ""}
       </section>
       <div class="divider"></div>
       <section>
@@ -217,7 +263,9 @@ function renderPage({ requestHost, isFallback, mappings }) {
     document.getElementById("saveRows").addEventListener("click", async () => {
       const mappings = {};
       for (const tr of [...tableBody.querySelectorAll("tr")]) {
-        const host = tr.querySelector('input[data-col="host"]').value.trim().toLowerCase();
+        const hostInput = tr.querySelector('input[data-col="host"]');
+        if (!hostInput) continue;
+        const host = hostInput.value.trim().toLowerCase();
         const portRaw = tr.querySelector('input[data-col="port"]').value.trim();
         if (!host && !portRaw) continue;
         mappings[host] = Number(portRaw);

@@ -43,9 +43,16 @@ fs.mkdirSync(stateDir, { recursive: true });
 const routes = [];
 
 for (const [host, target] of Object.entries(mappings)) {
-  if (!/^[a-z0-9-]+$/i.test(host)) {
+  if (!/^[a-z0-9-]+(\.[a-z0-9-]+)*$/i.test(host)) {
     fail(
-      `Invalid host key \"${host}\". Use a single hostname label with letters, numbers, and hyphens only.`
+      `Invalid host key "${host}". Use hostname labels (letters, numbers, hyphens) optionally separated by dots.`
+    );
+  }
+  if (/\./.test(host)) {
+    console.warn(
+      `Warning: "${host}" is a multi-level hostname (${host}.local). ` +
+      `mDNS resolution of multi-level .local names is reliable only on macOS and iOS. ` +
+      `Windows and Linux clients may not resolve it automatically.`
     );
   }
 
@@ -66,6 +73,13 @@ for (const [host, target] of Object.entries(mappings)) {
 
   if (!Number.isInteger(port) || port < 1 || port > 65535) {
     fail(`Invalid port for ${host}: ${port}`);
+  }
+
+  const reservedPorts = new Set([80, Number(publicPort), dashboardPort].filter(Number.isFinite));
+  if (reservedPorts.has(port)) {
+    fail(
+      `Port ${port} is reserved by DevProxy (used for the proxy, HTTP redirect, or dashboard). Choose a different port for "${host}".`
+    );
   }
 
   routes.push({ hostname: `${host}.local`, port, pid: 0 });

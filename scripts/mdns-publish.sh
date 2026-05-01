@@ -52,9 +52,12 @@ const fs=require("fs");
 const p=process.argv[1];
 const m=JSON.parse(fs.readFileSync(p,"utf8"));
 for (const k of Object.keys(m)) {
-  if (!/^[a-z0-9-]+$/i.test(k)) {
+  if (!/^[a-z0-9-]+(\.[a-z0-9-]+)*$/i.test(k)) {
     console.error(`Invalid host key: ${k}`);
     process.exit(1);
+  }
+  if (/\./.test(k)) {
+    process.stderr.write(`Warning: "${k}" is a multi-level hostname (${k}.local). mDNS resolution may not work on Windows or Linux clients.\n`);
   }
   console.log(k.toLowerCase());
 }
